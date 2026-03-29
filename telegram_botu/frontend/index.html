@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENITH | Uzay Havası Kontrol Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body.lang-en .tr-text {
+            display: none !important;
+        }
+
+        body.lang-tr .en-text {
+            display: none !important;
+        }
+
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            background-image:
+                linear-gradient(to right, rgba(168, 85, 247, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(168, 85, 247, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+        }
+
+        .glow-text-cyan {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.6);
+        }
+
+        .glow-text-purple {
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+        }
+
+        .data-card {
+            background: rgba(15, 15, 20, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .data-card:hover {
+            border-color: rgba(34, 211, 238, 0.4);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+        }
+
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background-color: #0a0a0a;
+            border-bottom: 1px solid #1f1f2e;
+        }
+
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            padding-right: 100%;
+            animation: ticker 30s linear infinite;
+            /* --- AKICILIK İÇİN EKLENEN GPU HİLELERİ --- */
+            will-change: transform; 
+            transform: translateZ(0); 
+            backface-visibility: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+
+            100% {
+                transform: translate3d(-100%, 0, 0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4c1d95;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="text-left lang-tr antialiased">
+
+    <div class="bg-grid"></div>
+
+    <div class="ticker-wrap h-8 flex items-center text-xs font-mono text-cyan-400">
+        <div class="ticker">
+            <span class="mx-4">⚡ SYSTEM STATUS: <span class="text-green-500">OPTIMAL</span></span>
+            <span class="mx-4">|</span>
+            <span class="mx-4">SOLAR WIND SPEED: 412 km/s</span>
+            <span class="mx-4">|</span>
+            <span class="mx-4">IMF Bz: -2.4 nT</span>
+            <span class="mx-4">|</span>
+            <span class="mx-4">LAST FLARE: C1.2 (08:12 UTC)</span>
+            <span class="mx-4">|</span>
+            <span class="mx-4">KP INDEX PRED: 2.33 (STABLE)</span>
+            <span class="mx-4">|</span>
+            <span class="mx-4">TUA SATELLITE TELEMETRY: NOMINAL</span>
+        </div>
+    </div>
+
+    <nav class="sticky top-0 z-40 data-card border-b-0 py-3 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <img src="image_1.png" alt="Zenith Logo" class="h-10 object-contain">
+                <div class="h-6 w-px bg-gray-600"></div>
+                <span class="text-xl font-black tracking-widest glow-text-cyan text-cyan-400 uppercase">TUA |
+                    Zenith</span>
+            </div>
+
+            <div class="flex items-center gap-6 text-xs font-bold tracking-widest uppercase text-gray-400">
+                <a href="#dashboard" class="hover:text-cyan-400 transition"><span class="tr-text">Sistem
+                        Paneli</span><span class="en-text">Dashboard</span></a>
+                <a href="#tua-veri" class="hover:text-cyan-400 transition"><span class="tr-text">TUA
+                        İstihbarat</span><span class="en-text">TUA Intel</span></a>
+                <a href="#patlamalar" class="hover:text-cyan-400 transition"><span class="tr-text">Tehdit
+                        Analizi</span><span class="en-text">Threat Analysis</span></a>
+            </div>
+
+            <div class="flex gap-3 text-xs">
+                <button onclick="toggleLanguage()" class="px-3 py-1.5 border border-gray-600 hover:border-cyan-400 text-gray-300 rounded transition font-mono">
+                    <span class="tr-text">EN</span><span class="en-text">TR</span>
+                </button>
+                
+                <div id="misafirMenu" class="flex gap-3">
+                    <button onclick="openModal('loginModal')" class="px-4 py-1.5 border border-purple-500 hover:bg-purple-900/50 text-white rounded transition">
+                        Giriş Yap
+                    </button>
+                    <button onclick="openModal('registerModal')" class="px-4 py-1.5 bg-purple-700 hover:bg-purple-600 border border-purple-500 text-white rounded transition">
+                        Kayıt Ol
+                    </button>
+                </div>
+
+                <div id="kullaniciMenu" class="hidden flex items-center gap-3">
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-cyan-900/30 border border-cyan-500/50 rounded text-cyan-300 font-mono shadow-inner">
+                        <span class="animate-pulse">🟢</span> 
+                        <span id="aktifKullaniciAdi" class="font-bold tracking-widest">Yetkili</span>
+                    </div>
+                    <button onclick="cikisYap()" class="px-3 py-1.5 border border-red-500 hover:bg-red-900/50 text-red-400 rounded transition font-bold">
+                        ÇIKIŞ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/80 z-50 flex justify-center items-center backdrop-blur-md transition-opacity">
+        <div class="data-card p-8 rounded-2xl w-full max-w-sm relative border-t-4 border-t-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl leading-none">&times;</button>
+            <h2 class="text-2xl font-black mb-6 text-white tracking-widest uppercase glow-text-purple">Sistem Girişi</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase tracking-widest mb-1 block">Kullanıcı Adı / ID</label>
+                    <input type="text" id="girisKullaniciAdi" placeholder="Örn: Dr. Ayberk" class="w-full p-3 rounded bg-black/60 border border-gray-700 text-cyan-300 focus:outline-none focus:border-cyan-500 text-sm font-mono shadow-inner">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase tracking-widest mb-1 block">Erişim Şifresi</label>
+                    <input type="password" placeholder="••••••••" class="w-full p-3 rounded bg-black/60 border border-gray-700 text-cyan-300 focus:outline-none focus:border-cyan-500 text-sm font-mono shadow-inner">
+                </div>
+                <div class="pt-4">
+                    <button onclick="girisYapSimulasyon(this)" class="w-full py-3 bg-purple-600/30 hover:bg-purple-600 border border-purple-500 rounded text-sm font-bold tracking-widest text-white transition shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                        GİRİŞ YAP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="hidden fixed inset-0 bg-black/80 z-50 flex justify-center items-center backdrop-blur-md transition-opacity">
+        <div class="data-card p-8 rounded-2xl w-full max-w-sm relative border-t-4 border-t-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
+            <button onclick="closeModal('registerModal')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl leading-none">&times;</button>
+            <h2 class="text-2xl font-black mb-6 text-white tracking-widest uppercase glow-text-cyan">Sisteme Kayıt</h2>
+            
+            <div id="kayitAdim1" class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 uppercase tracking-widest mb-1 block">Ad Soyad</label>
+                    <input type="text" id="kayitIsim" placeholder="Örn: Ayberk Kar" class="w-full p-3 rounded bg-black/60 border border-gray-700 text-cyan-300 focus:outline-none focus:border-cyan-500 text-sm font-mono shadow-inner">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase tracking-widest mb-1 block">Telefon Numarası</label>
+                    <input type="text" id="kayitTelefon" placeholder="0555 123 45 67" class="w-full p-3 rounded bg-black/60 border border-gray-700 text-cyan-300 focus:outline-none focus:border-cyan-500 text-sm font-mono shadow-inner">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase tracking-widest mb-1 block">Şifre Belirle</label>
+                    <input type="password" id="kayitSifresi" placeholder="En az 8 karakter" class="w-full p-3 rounded bg-black/60 border border-gray-700 text-cyan-300 focus:outline-none focus:border-cyan-500 text-sm font-mono shadow-inner">
+                </div>
+                <div class="pt-4">
+                    <button onclick="telegramKoduGonder()" id="btnKodGonder" class="w-full py-3 bg-cyan-600/30 hover:bg-cyan-600 border border-cyan-500 rounded text-sm font-bold tracking-widest text-white transition">
+                        TELEGRAM'A KOD GÖNDER
+                    </button>
+                </div>
+            </div>
+
+            <div id="kayitAdim2" class="space-y-4 hidden">
+                <p class="text-xs text-amber-400 mb-4 text-center animate-pulse">Telegram botuna gönderilen 4 haneli doğrulama kodunu giriniz.</p>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase tracking-widest mb-1 block text-center">Doğrulama Kodu</label>
+                    <input type="text" id="kayitKodu" placeholder="••••" class="w-full p-4 rounded bg-black/60 border border-cyan-500 text-white text-center text-2xl tracking-[1em] focus:outline-none focus:border-purple-500 shadow-inner">
+                </div>
+                <div class="pt-4">
+                    <button onclick="koduDogrula()" id="btnDogrula" class="w-full py-3 bg-purple-600/30 hover:bg-purple-600 border border-purple-500 rounded text-sm font-bold tracking-widest text-white transition">
+                        KODU ONAYLA VE KAYDOL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-8 mt-4">
+
+        <section id="dashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 data-card p-8 rounded-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-700/10 rounded-full blur-[80px]"></div>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="relative flex h-3 w-3"><span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span
+                            class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span></span>
+                    <span class="text-xs font-mono text-cyan-400 tracking-widest">LIVE TRACKING ACTIVE</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-black mb-4 text-white tracking-tight">
+                    <span class="tr-text">Erken Uyarı Paneli <span class="text-purple-500">v2.0</span></span>
+                    <span class="en-text">Early Warning Panel <span class="text-purple-500">v2.0</span></span>
+                </h1>
+                <p class="text-gray-400 text-sm md:text-base leading-relaxed max-w-2xl mb-8">
+                    <span class="tr-text">Derin uzaydan gelen elektromanyetik tehditleri saniyeler içinde analiz eden,
+                        yapay zeka destekli otonom savunma ağı. Zenith, küresel şebekeleri ve uyduları korumak için
+                        Güneş dinamiklerini kesintisiz izler.</span>
+                    <span class="en-text">AI-powered autonomous defense network analyzing deep space electromagnetic
+                        threats in seconds. Zenith continuously monitors Solar dynamics to protect global grids and
+                        satellites.</span>
+                </p>
+                <div class="flex gap-4">
+                    <button id="analyzeBtn" onclick="startAnalysis()"
+                        class="px-6 py-3 bg-cyan-600/20 border border-cyan-500 text-cyan-300 text-sm font-bold rounded hover:bg-cyan-600/40 transition tracking-widest flex items-center justify-center min-w-[200px]">
+                        <span class="tr-text">ANALİZ BAŞLAT</span><span class="en-text">RUN ANALYSIS</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="data-card p-5 rounded-xl border-l-4 border-l-cyan-500">
+                    <h3 class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1"><span
+                            class="tr-text">Güneş Rüzgarı Hızı</span><span class="en-text">Solar Wind Speed</span></h3>
+                    <div class="flex items-end gap-2">
+                        <span class="text-3xl font-mono text-white">412.5</span>
+                        <span class="text-sm text-cyan-500 mb-1">km/s</span>
+                    </div>
+                </div>
+                <div class="data-card p-5 rounded-xl border-l-4 border-l-purple-500">
+                    <h3 class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1"><span
+                            class="tr-text">Manyetik Alan (Bz)</span><span class="en-text">Magnetic Field (Bz)</span>
+                    </h3>
+                    <div class="flex items-end gap-2">
+                        <span class="text-3xl font-mono text-white">-2.4</span>
+                        <span class="text-sm text-purple-400 mb-1">nT</span>
+                    </div>
+                </div>
+                <div class="data-card p-5 rounded-xl border-l-4 border-l-green-500">
+                    <h3 class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1"><span class="tr-text">Kp
+                            İndeksi Tahmini</span><span class="en-text">Kp Index Pred.</span></h3>
+                    <div class="flex items-end gap-2">
+                        <span class="text-3xl font-mono text-white">2.33</span>
+                        <span class="text-sm text-green-400 mb-1">Normal</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="pt-2">
+            <div
+                class="data-card p-6 rounded-xl border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-900/10 to-transparent">
+                <h3 class="text-sm font-black text-amber-500 tracking-widest uppercase mb-3 flex items-center gap-2">
+                    <span class="animate-pulse">⚠️</span> <span class="tr-text">Tehdit Bilgilendirmesi: Güneş
+                        Patlamaları</span><span class="en-text">Threat Briefing: Solar Flares</span>
+                </h3>
+                <p class="text-gray-300 text-sm leading-relaxed">
+                    <span class="tr-text">Güneş patlamaları (Solar Flares), Güneş'in atmosferinde manyetik alan
+                        çizgilerinin bükülüp aniden kopmasıyla ortaya çıkan şiddetli enerji boşalmalarıdır. Bu olaylar
+                        saniyeler içinde devasa boyutta radyasyon yayar. Dünya'ya ulaştıklarında iyonosferi bozarak
+                        <strong>GPS sinyallerinde sapmalara, uydu haberleşmesinde kesintilere ve ulusal elektrik
+                            şebekelerinde (transformatörlerde) ağır hasarlara</strong> yol açabilirler. Zenith sistemi,
+                        bu yıkıcı etkileri minimize etmek için patlamaları henüz Dünya'ya ulaşmadan algılar ve kritik
+                        altyapılar için otonom erken uyarılar üretir.</span>
+                    <span class="en-text">Solar flares are intense bursts of radiation caused by the sudden release of
+                        magnetic energy in the Sun's atmosphere. Emitting massive amounts of energy in seconds, these
+                        events can disrupt the ionosphere upon reaching Earth. They cause <strong>GPS signal
+                            degradation, satellite communication blackouts, and severe damage to transformers in
+                            national power grids</strong>. The Zenith system detects these anomalies before impact,
+                        generating autonomous early warnings to protect critical infrastructure.</span>
+                </p>
+            </div>
+        </section>
+
+        <section id="tua-veri" class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6">
+            <div>
+                <h2
+                    class="text-sm font-black text-gray-500 tracking-widest uppercase mb-4 border-b border-gray-800 pb-2">
+                    <span class="tr-text">TUA Operasyonel Veriler</span><span class="en-text">TUA Operational
+                        Data</span>
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="data-card p-6 rounded-lg text-center">
+                        <div class="text-4xl font-black text-purple-400 mb-2">2.4<span class="text-lg">TB</span></div>
+                        <div class="text-xs text-gray-400 uppercase tracking-widest"><span class="tr-text">Günlük
+                                İşlenen Veri</span><span class="en-text">Daily Processed Data</span></div>
+                    </div>
+                    <div class="data-card p-6 rounded-lg text-center">
+                        <div class="text-4xl font-black text-cyan-400 mb-2">98.5<span class="text-lg">%</span></div>
+                        <div class="text-xs text-gray-400 uppercase tracking-widest"><span class="tr-text">Yapay Zeka
+                                Doğruluğu</span><span class="en-text">AI Accuracy Model</span></div>
+                    </div>
+                    <div class="data-card p-6 rounded-lg text-center">
+                        <div class="text-4xl font-black text-white mb-2">124</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-widest"><span class="tr-text">Aktif Güneş
+                                Lekesi Takibi</span><span class="en-text">Active Sunspot Tracking</span></div>
+                    </div>
+                    <div class="data-card p-6 rounded-lg text-center">
+                        <div class="text-4xl font-black text-amber-500 mb-2">3</div>
+                        <div class="text-xs text-gray-400 uppercase tracking-widest"><span class="tr-text">Kritik Uyarı
+                                (Bu Ay)</span><span class="en-text">Critical Alerts (This Month)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2
+                    class="text-sm font-black text-gray-500 tracking-widest uppercase mb-4 border-b border-gray-800 pb-2">
+                    <span class="tr-text">Güncel Ar-Ge Çalışmaları</span><span class="en-text">Current R&D
+                        Studies</span>
+                </h2>
+                <div class="space-y-4">
+                    <div class="data-card p-5 rounded-lg flex items-start gap-4 cursor-pointer hover:bg-white/5">
+                        <div
+                            class="w-10 h-10 rounded bg-purple-900/50 border border-purple-500 flex items-center justify-center text-purple-300 font-bold">
+                            01</div>
+                        <div>
+                            <h4 class="font-bold text-gray-200 text-sm mb-1"><span class="tr-text">İyonosferik Gecikme
+                                    Modellemesi</span><span class="en-text">Ionospheric Delay Modeling</span></h4>
+                            <p class="text-xs text-gray-500"><span class="tr-text">GNSS sinyallerindeki kayıpları %40
+                                    oranında azaltan yeni nesil algoritma optimizasyonu.</span><span
+                                    class="en-text">Next-gen algorithm reducing GNSS signal loss by 40%.</span></p>
+                        </div>
+                    </div>
+                    <div class="data-card p-5 rounded-lg flex items-start gap-4 cursor-pointer hover:bg-white/5">
+                        <div
+                            class="w-10 h-10 rounded bg-cyan-900/50 border border-cyan-500 flex items-center justify-center text-cyan-300 font-bold">
+                            02</div>
+                        <div>
+                            <h4 class="font-bold text-gray-200 text-sm mb-1"><span class="tr-text">Derin Öğrenme ile
+                                    L-Band Koruması</span><span class="en-text">Deep Learning L-Band Protection</span>
+                            </h4>
+                            <p class="text-xs text-gray-500"><span class="tr-text">Uydu haberleşme frekanslarını
+                                    X-Sınıfı patlamalara karşı izole eden LSTM tabanlı ağ.</span><span
+                                    class="en-text">LSTM-based network isolating sat-com freqs against X-Class
+                                    flares.</span></p>
+                        </div>
+                    </div>
+                    <div class="data-card p-5 rounded-lg flex items-start gap-4 cursor-pointer hover:bg-white/5">
+                        <div
+                            class="w-10 h-10 rounded bg-gray-800 border border-gray-600 flex items-center justify-center text-gray-300 font-bold">
+                            03</div>
+                        <div>
+                            <h4 class="font-bold text-gray-200 text-sm mb-1"><span class="tr-text">Manyetik Fırtına
+                                    Öngörü API'si</span><span class="en-text">Magnetic Storm Prediction API</span></h4>
+                            <p class="text-xs text-gray-500"><span class="tr-text">Ulusal elektrik şebekelerine (TEİAŞ)
+                                    entegre edilecek 72 saatlik erken uyarı API geliştirimi.</span><span
+                                    class="en-text">72-hour early warning API development for national power
+                                    grids.</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="patlamalar" class="pt-8 pb-12">
+            <h2 class="text-sm font-black text-gray-500 tracking-widest uppercase mb-4 border-b border-gray-800 pb-2">
+                <span class="tr-text">Elektromanyetik Tehdit Kaydı (Son 72 Saat)</span><span
+                    class="en-text">Electromagnetic Threat Log (Last 72H)</span>
+            </h2>
+            <div class="data-card rounded-lg overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-black/50 text-gray-400 font-mono text-xs uppercase border-b border-gray-800">
+                        <tr>
+                            <th class="px-6 py-4">Event ID</th>
+                            <th class="px-6 py-4"><span class="tr-text">Zaman (UTC)</span><span class="en-text">Time
+                                    (UTC)</span></th>
+                            <th class="px-6 py-4"><span class="tr-text">Sınıf</span><span class="en-text">Class</span>
+                            </th>
+                            <th class="px-6 py-4"><span class="tr-text">Koord.</span><span class="en-text">Coord.</span>
+                            </th>
+                            <th class="px-6 py-4">Max Kp</th>
+                            <th class="px-6 py-4"><span class="tr-text">Sistem Reaksiyonu</span><span
+                                    class="en-text">System Reaction</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800/50 font-mono text-gray-300">
+                        <tr class="hover:bg-red-900/10 transition border-l-2 border-l-red-500">
+                            <td class="px-6 py-3 text-gray-500">EVT-992A</td>
+                            <td class="px-6 py-3">2026-03-29 08:45:12</td>
+                            <td class="px-6 py-3 text-red-500 font-bold">X2.1</td>
+                            <td class="px-6 py-3">N15W42</td>
+                            <td class="px-6 py-3 text-red-400">8.3</td>
+                            <td class="px-6 py-3"><span
+                                    class="bg-red-500/10 text-red-400 px-2 py-1 rounded text-xs border border-red-500/30">SHIELD
+                                    ACTIVATED</span></td>
+                        </tr>
+                        <tr class="hover:bg-amber-900/10 transition border-l-2 border-l-amber-500">
+                            <td class="px-6 py-3 text-gray-500">EVT-991B</td>
+                            <td class="px-6 py-3">2026-03-28 14:20:00</td>
+                            <td class="px-6 py-3 text-amber-500 font-bold">M4.5</td>
+                            <td class="px-6 py-3">S22E10</td>
+                            <td class="px-6 py-3 text-amber-400">5.1</td>
+                            <td class="px-6 py-3"><span
+                                    class="bg-amber-500/10 text-amber-400 px-2 py-1 rounded text-xs border border-amber-500/30">WARNING
+                                    ISSUED</span></td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition border-l-2 border-l-gray-600">
+                            <td class="px-6 py-3 text-gray-500">EVT-990C</td>
+                            <td class="px-6 py-3">2026-03-28 02:10:44</td>
+                            <td class="px-6 py-3 text-green-400 font-bold">C8.0</td>
+                            <td class="px-6 py-3">N05E55</td>
+                            <td class="px-6 py-3 text-gray-400">3.0</td>
+                            <td class="px-6 py-3"><span
+                                    class="bg-gray-700/30 text-gray-400 px-2 py-1 rounded text-xs border border-gray-600/30">LOGGED</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="hakkimizda" class="pt-12 pb-6 border-t border-gray-800/50 mt-8">
+            <h2 class="text-sm font-black text-gray-500 tracking-widest uppercase mb-8 text-center">
+                <span class="animate-pulse">🚀</span> 
+                <span class="tr-text">Zenith Geliştirme Ekibi</span>
+                <span class="en-text">Zenith Development Team</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="data-card p-6 rounded-xl text-center group hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-16 h-16 mx-auto bg-purple-900/30 border border-purple-500 rounded-full flex items-center justify-center mb-4 text-xl font-black text-purple-400 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-shadow">AK</div>
+                    <h3 class="text-lg font-bold text-white mb-1">Ayberk Kar</h3>
+                    <div class="h-10 flex items-center justify-center mb-3">
+                        <p class="text-xs font-mono text-purple-400">
+                            <span class="tr-text">Yapay Zeka ve Makine Öğrenmesi Model Eğitimi</span>
+                            <span class="en-text">AI & ML Model Training</span>
+                        </p>
+                    </div>
+                    <div class="w-full h-px bg-gray-800 mb-3"></div>
+                    <div class="space-y-2 text-xs text-gray-400">
+                        <p class="font-bold text-gray-300">Bursa Teknik Üniversitesi</p>
+                        <a href="mailto:ayberkkar80@gmail.com" class="hover:text-cyan-400 transition block">ayberkkar80@gmail.com</a>
+                        <a href="https://github.com/ayberkkr" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs bg-gray-800 hover:bg-purple-600 border border-gray-600 hover:border-purple-400 text-gray-300 hover:text-white px-3 py-1 rounded-full transition-all">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            ayberkkr
+                        </a>
+                    </div>
+                </div>
+
+                <div class="data-card p-6 rounded-xl text-center group hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-16 h-16 mx-auto bg-cyan-900/30 border border-cyan-500 rounded-full flex items-center justify-center mb-4 text-xl font-black text-cyan-400 group-hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-shadow">İET</div>
+                    <h3 class="text-lg font-bold text-white mb-1">İsmail Emre Türkbay</h3>
+                    <div class="h-10 flex items-center justify-center mb-3">
+                        <p class="text-xs font-mono text-cyan-400">
+                            <span class="tr-text">Veri Seti Hazırlama, Temizleme ve Analiz</span>
+                            <span class="en-text">Dataset Prep, Cleaning & Analysis</span>
+                        </p>
+                    </div>
+                    <div class="w-full h-px bg-gray-800 mb-3"></div>
+                    <div class="space-y-2 text-xs text-gray-400">
+                        <p class="font-bold text-gray-300">Bursa Teknik Üniversitesi</p>
+                        <a href="mailto:emreturkbay@gmail.com" class="hover:text-purple-400 transition block">emreturkbay@gmail.com</a>
+                        <a href="https://github.com/EmreTurkbay" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs bg-gray-800 hover:bg-cyan-600 border border-gray-600 hover:border-cyan-400 text-gray-300 hover:text-white px-3 py-1 rounded-full transition-all">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            EmreTurkbay
+                        </a>
+                    </div>
+                </div>
+
+                <div class="data-card p-6 rounded-xl text-center group hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-16 h-16 mx-auto bg-green-900/30 border border-green-500 rounded-full flex items-center justify-center mb-4 text-xl font-black text-green-400 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.5)] transition-shadow">ESK</div>
+                    <h3 class="text-lg font-bold text-white mb-1">Elif Sude Kapan</h3>
+                    <div class="h-10 flex items-center justify-center mb-3">
+                        <p class="text-xs font-mono text-green-400">
+                            <span class="tr-text">Arka Uç (Backend) Geliştirme</span>
+                            <span class="en-text">Backend Development</span>
+                        </p>
+                    </div>
+                    <div class="w-full h-px bg-gray-800 mb-3"></div>
+                    <div class="space-y-2 text-xs text-gray-400">
+                        <p class="font-bold text-gray-300">Bursa Teknik Üniversitesi</p>
+                        <a href="mailto:elifsudekapann@gmail.com" class="hover:text-cyan-400 transition block">elifsudekapann@gmail.com</a>
+                        <a href="https://github.com/efilsude" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs bg-gray-800 hover:bg-green-600 border border-gray-600 hover:border-green-400 text-gray-300 hover:text-white px-3 py-1 rounded-full transition-all">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            efilsude
+                        </a>
+                    </div>
+                </div>
+
+                <div class="data-card p-6 rounded-xl text-center group hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-16 h-16 mx-auto bg-amber-900/30 border border-amber-500 rounded-full flex items-center justify-center mb-4 text-xl font-black text-amber-400 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.5)] transition-shadow">GÖ</div>
+                    <h3 class="text-lg font-bold text-white mb-1">Gizem Öksüz</h3>
+                    <div class="h-10 flex items-center justify-center mb-3">
+                        <p class="text-xs font-mono text-amber-400">
+                            <span class="tr-text">Ön Uç (Frontend) Geliştirme ve UI/UX</span>
+                            <span class="en-text">Frontend Development & UI/UX</span>
+                        </p>
+                    </div>
+                    <div class="w-full h-px bg-gray-800 mb-3"></div>
+                    <div class="space-y-2 text-xs text-gray-400">
+                        <p class="font-bold text-gray-300">Bursa Teknik Üniversitesi</p>
+                        <a href="mailto:oksuzgizem746@gmail.com" class="hover:text-purple-400 transition block">oksuzgizem746@gmail.com</a>
+                        <a href="https://github.com/Gizemksz" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs bg-gray-800 hover:bg-amber-600 border border-gray-600 hover:border-amber-400 text-gray-300 hover:text-white px-3 py-1 rounded-full transition-all">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            Gizemksz
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        </main>
+
+    <script>
+        // Dil Değiştirme
+        function toggleLanguage() {
+            const body = document.body;
+            if (body.classList.contains('lang-tr')) {
+                body.classList.remove('lang-tr');
+                body.classList.add('lang-en');
+            } else {
+                body.classList.remove('lang-en');
+                body.classList.add('lang-tr');
+            }
+        }
+
+        // Modal Açma / Kapama
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // --- KULLANICI GİRİŞ / ÇIKIŞ GÖRSEL KONTROLLERİ ---
+        function basariylaGirisYapti(kullaniciAdi) {
+            document.getElementById('misafirMenu').classList.add('hidden');
+            document.getElementById('kullaniciMenu').classList.remove('hidden');
+            // Girdiği ismi sağ üstteki panele yazdır
+            document.getElementById('aktifKullaniciAdi').innerText = kullaniciAdi || "Sistem Uzmanı";
+        }
+
+        function cikisYap() {
+            document.getElementById('misafirMenu').classList.remove('hidden');
+            document.getElementById('kullaniciMenu').classList.add('hidden');
+        }
+
+        // --- GİRİŞ YAP BUTONU SİMÜLASYONU ---
+        function girisYapSimulasyon(btnElement) {
+            const isim = document.getElementById('girisKullaniciAdi').value;
+            const originalContent = btnElement.innerHTML;
+            
+            btnElement.innerHTML = `<span class="animate-pulse">⏳ LÜTFEN BEKLEYİN...</span>`;
+            
+            setTimeout(() => {
+                btnElement.innerHTML = `✅ GİRİŞ BAŞARILI`;
+                btnElement.classList.replace('bg-purple-600/30', 'bg-green-600/50');
+                
+                setTimeout(() => {
+                    closeModal('loginModal');
+                    basariylaGirisYapti(isim); // Sağ üstteki ismi günceller
+                    
+                    // Butonu ve kutuyu sıfırla
+                    btnElement.innerHTML = originalContent;
+                    btnElement.classList.replace('bg-green-600/50', 'bg-purple-600/30');
+                    document.getElementById('girisKullaniciAdi').value = ""; 
+                }, 1000);
+            }, 1500);
+        }
+
+        // Analiz Başlat Simülasyonu (Site Görseli + Telegram Bir Arada)
+        function startAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            const originalContent = btn.innerHTML;
+            const isTr = document.body.classList.contains('lang-tr');
+
+            // 1. AŞAMA: Orijinalindeki gibi "Analiz Ediliyor" görseli (Sarı)
+            btn.innerHTML = `<span class="animate-pulse">⏳ ${isTr ? 'ANALİZ EDİLİYOR...' : 'ANALYZING...'}</span>`;
+            btn.classList.remove('border-cyan-500', 'text-cyan-300', 'bg-cyan-600/20');
+            btn.classList.add('border-amber-500', 'text-amber-400', 'bg-amber-600/20');
+
+            // 2. AŞAMA: 2 Saniye sonra hem sitede uyarı ver hem Telegram'a at!
+            setTimeout(() => {
+                // Sitedeki görsel değişimi (Kırmızı Uyarı)
+                btn.innerHTML = `🚨 ${isTr ? 'KRİTİK RİSK! TELEGRAMA İLETİLDİ' : 'CRITICAL RISK! ALERT SENT'}`;
+                btn.classList.remove('border-amber-500', 'text-amber-400', 'bg-amber-600/20');
+                btn.classList.add('border-red-500', 'text-red-400', 'bg-red-600/20');
+
+                // Tam bu anda arka planda Telegram'a mesajı fırlat
+                fetch('/uyari-gonder?mesaj=🚨 Jüri Testi: Zenith sistemi Güneş fırtınası riskini doğruladı!', {
+                    method: 'POST'
+                }).then(response => console.log("Telegram bildirimi başarıyla yollandı!"));
+
+                // 3. AŞAMA: 3 saniye sonra butonu eski orijinal haline döndür
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.classList.remove('border-red-500', 'text-red-400', 'bg-red-600/20');
+                    btn.classList.add('border-cyan-500', 'text-cyan-300', 'bg-cyan-600/20');
+                }, 3000);
+
+            }, 2000); 
+        }
+
+        let gercekKod = ""; // Backend'den gelecek kod burada tutulacak
+
+        function telegramKoduGonder() {
+            const telefon = document.getElementById('kayitTelefon').value;
+            const btn = document.getElementById('btnKodGonder');
+            
+            if(!telefon) { alert("Lütfen numara girin!"); return; }
+
+            btn.innerHTML = "⏳ KOD GÖNDERİLİYOR...";
+            
+            // Backend'deki Python'a istek at
+            fetch(`/kayit-kodu-gonder?telefon=${telefon}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if(data.durum === "Başarılı") {
+                    gercekKod = data.kod; // Arka plandan gelen şifreyi hafızaya al
+                    
+                    // Görseli Adım 2'ye geçir
+                    document.getElementById('kayitAdim1').classList.add('hidden');
+                    document.getElementById('kayitAdim2').classList.remove('hidden');
+                }
+            });
+        }
+
+        function koduDogrula() {
+            const girilenKod = document.getElementById('kayitKodu').value;
+            const kayitOlanIsim = document.getElementById('kayitIsim').value;
+            const btn = document.getElementById('btnDogrula');
+
+            if(girilenKod === gercekKod) {
+                btn.innerHTML = "✅ KAYIT BAŞARILI!";
+                btn.classList.replace('bg-purple-600/30', 'bg-green-600/50');
+                
+                setTimeout(() => {
+                    closeModal('registerModal');
+                    basariylaGirisYapti(kayitOlanIsim); // Kayıt olunca da otomatik giriş yapsın
+                    
+                    // Ekrani temizle
+                    document.getElementById('kayitAdim1').classList.remove('hidden');
+                    document.getElementById('kayitAdim2').classList.add('hidden');
+                    document.getElementById('kayitTelefon').value = "";
+                    document.getElementById('kayitKodu').value = "";
+                    document.getElementById('kayitSifresi').value = ""; // Şifre kutusunu da temizle
+                    btn.innerHTML = "KODU ONAYLA VE KAYDOL";
+                    btn.classList.replace('bg-green-600/50', 'bg-purple-600/30');
+                }, 2000);
+            } else {
+                alert("❌ Hatalı kod girdiniz! Lütfen Telegram'ı kontrol edin.");
+            }
+        }
+    </script>
+</body>
+</html>
